@@ -4,15 +4,23 @@ import { useState } from "react";
 import { ShieldCheck, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound, RefreshCw, ArrowLeft, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+function maskEmailAddress(emailStr: string) {
+  if (!emailStr || !emailStr.includes("@")) return "your registered email";
+  const [name, domain] = emailStr.split("@");
+  if (name.length <= 2) return `${name[0]}*@${domain}`;
+  return `${name.slice(0, 2)}${"*".repeat(Math.max(name.length - 2, 2))}@${domain}`;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [step, setStep] = useState<"credentials" | "otp">("credentials");
-  const [email, setEmail] = useState<string>("info@bhusrigeo.com");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [otp, setOtp] = useState<string>("");
   const [otpToken, setOtpToken] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [mailSent, setMailSent] = useState<boolean>(false);
+  const [maskedEmail, setMaskedEmail] = useState<string>("");
   const [fallbackOtp, setFallbackOtp] = useState<string | null>(null);
   const [smtpNotice, setSmtpNotice] = useState<string | null>(null);
 
@@ -38,7 +46,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setAuthError(data.error || "Authentication failed. Please verify credentials.");
+        setAuthError(data.error || "Authentication failed. Please verify email & password credentials.");
         setIsLoading(false);
         return;
       }
@@ -46,6 +54,7 @@ export default function LoginPage() {
       setOtpToken(data.otpToken || null);
       setExpiresAt(data.expiresAt || null);
       setMailSent(!!data.mailSent);
+      setMaskedEmail(data.maskedEmail || maskEmailAddress(email));
       setFallbackOtp(data.fallbackOtp || null);
       setSmtpNotice(data.message || null);
 
@@ -86,12 +95,12 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setAuthError(data.error || "Invalid 6-digit OTP code entered. Please check info@bhusrigeo.com inbox.");
+        setAuthError(data.error || "Invalid 6-digit OTP code entered. Please check your email inbox.");
         setIsLoading(false);
         return;
       }
 
-      setAuthSuccess("2FA Email Security Verification Successful! Opening Executive Portal...");
+      setAuthSuccess("2FA Security Verification Successful! Opening Executive Portal...");
       setTimeout(() => {
         setIsLoading(false);
         router.push("/portal");
@@ -160,11 +169,11 @@ export default function LoginPage() {
               <Send className={`h-4 w-4 shrink-0 mt-0.5 ${mailSent ? "text-emerald-400" : "text-sky-400"}`} />
               <div>
                 <p className="font-bold text-white">
-                  {mailSent ? "6-Digit OTP Dispatched to Email!" : "2FA OTP Security Code Ready"}
+                  {mailSent ? "6-Digit OTP Dispatched!" : "2FA Security Code Ready"}
                 </p>
                 <p className="text-[11px] mt-0.5">
                   {mailSent ? (
-                    <span>Sent via SMTP server to <strong>{email}</strong>. Check your email inbox.</span>
+                    <span>Sent via SMTP to <strong>{maskedEmail}</strong>. Please check your inbox.</span>
                   ) : (
                     <span>{smtpNotice}</span>
                   )}
@@ -186,7 +195,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="info@bhusrigeo.com"
+                    placeholder="admin@company.com"
                     className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-mono text-white placeholder-slate-400 focus:border-sky-400 focus:bg-white/20 focus:outline-none transition-all shadow-inner"
                   />
                   <Mail className="absolute right-3.5 top-3.5 h-4 w-4 text-slate-400" />
@@ -258,7 +267,7 @@ export default function LoginPage() {
                   <KeyRound className="absolute right-3.5 top-3.5 h-5 w-5 text-sky-400" />
                 </div>
                 <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-slate-300">
-                  <span>Sent to {email}</span>
+                  <span>Sent to {maskedEmail || maskEmailAddress(email)}</span>
                   <button
                     type="button"
                     onClick={handleSendOtp}
@@ -315,7 +324,7 @@ export default function LoginPage() {
       <div className="relative z-10 pb-6 text-center text-xs text-slate-400 font-mono space-y-1">
         <p>BHUSRI GEOSCIENCES &amp; ENGINEERING SOLUTIONS PRIVATE LIMITED</p>
         <p className="text-[11px] text-slate-500">
-          Strictly for authorized executive personnel. SMTP 2FA security events logged.
+          Strictly for authorized executive personnel. All 2FA security events logged.
         </p>
       </div>
     </div>

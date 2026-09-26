@@ -9,6 +9,13 @@ function generateHmacToken(email: string, otp: string, expiresAt: number) {
   return crypto.createHmac("sha256", SECRET_KEY).update(data).digest("hex");
 }
 
+function maskEmailAddress(emailStr: string) {
+  if (!emailStr || !emailStr.includes("@")) return "your registered address";
+  const [name, domain] = emailStr.split("@");
+  if (name.length <= 2) return `${name[0]}*@${domain}`;
+  return `${name.slice(0, 2)}${"*".repeat(name.length - 2)}@${domain}`;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -21,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: `Unauthorized email address. Only executive admin (${adminEmail}) is permitted for ERP access.`
+          error: "Unauthorized email credentials. Access restricted to authorized executive admin."
         },
         { status: 401 }
       );
@@ -29,10 +36,13 @@ export async function POST(request: Request) {
 
     // Step 1: Send OTP via SMTP
     if (action === "send-otp" || (!otp && !action)) {
+      const targetEmail = email ? email.trim() : adminEmail;
+      const maskedEmail = maskEmailAddress(targetEmail);
+
       // Generate random 6-digit cryptographic OTP code
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       const expirationMs = Date.now() + 10 * 60 * 1000; // valid for 10 minutes
-      const hmacToken = generateHmacToken(adminEmail, generatedOtp, expirationMs);
+      const hmacToken = generateHmacToken(targetEmail, generatedOtp, expirationMs);
 
       // SMTP credentials from Fly environment variables
       const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
@@ -61,7 +71,7 @@ export async function POST(request: Request) {
 
           await transporter.sendMail({
             from: smtpFrom,
-            to: adminEmail,
+            to: targetEmail,
             subject: `🔒 ${generatedOtp} - Your BHUSRI ERP 2FA Security Code`,
             html: `
               <div style="font-family: Arial, sans-serif; background-color: #07142F; color: #ffffff; padding: 30px; border-radius: 12px; max-width: 500px; margin: auto;">
@@ -93,27 +103,29 @@ export async function POST(request: Request) {
         success: true,
         requiresOtp: true,
         mailSent,
-        mailError: mailSent ? null : (mailPassSet => mailPassSet ? mailError : "SMTP_PASS environment variable not set on Fly")(!!smtpPass),
+        maskedEmail,
+        mailError: mailSent ? null : (mailPassSet => mailPassSet ? mailError : "SMTP_PASS not set on server")(!!smtpPass),
         otpToken: hmacToken,
         expiresAt: expirationMs,
-        // If SMTP email was dispatched successfully, hide fallback; if no SMTP configured, provide emergency code
+        // Hide fallback if mail sent
         fallbackOtp: mailSent ? undefined : generatedOtp,
         message: mailSent
-          ? `6-Digit Security OTP successfully sent to ${adminEmail} inbox via SMTP!`
-          : `2FA OTP Generated. (SMTP Note: ${mailError || "Set SMTP_PASS in Fly secrets to deliver directly to email"}).`
+          ? `6-Digit Security OTP dispatched to ${maskedEmail} via SMTP!`
+          : `2FA OTP Generated. (SMTP Notice: Configure SMTP_PASS in Fly secrets for direct inbox delivery).`
       });
     }
 
     // Step 2: Verify OTP
     if (action === "verify-otp" || otp) {
       const cleanOtp = otp ? otp.toString().trim() : "";
+      const targetEmail = email ? email.trim() : adminEmail;
       const now = Date.now();
 
       let isValid = false;
 
       // 1. Verify cryptographic HMAC signature
       if (otpToken && expiresAt && now <= parseInt(expiresAt.toString(), 10)) {
-        const expectedHmac = generateHmacToken(adminEmail, cleanOtp, parseInt(expiresAt.toString(), 10));
+        const expectedHmac = generateHmacToken(targetEmail, cleanOtp, parseInt(expiresAt.toString(), 10));
         if (expectedHmac === otpToken) {
           isValid = true;
         }
@@ -128,7 +140,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
           {
             success: false,
-            error: `Invalid or expired 6-Digit OTP code. Please check your ${adminEmail} inbox or request a new code.`
+            error: "Invalid or expired 6-Digit OTP code. Please check your email inbox or request a new code."
           },
           { status: 400 }
         );
@@ -138,7 +150,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         authenticated: true,
-        message: `Single Admin User ${adminEmail} authenticated successfully via 2FA Email Verification.`,
+        message: "Executive Admin authenticated successfully via 2FA Email Verification.",
         user: {
           email: adminEmail,
           role: "SuperAdmin",
