@@ -381,7 +381,7 @@ export default function ContractsPage() {
             <div className="space-y-6 text-xs font-sans">
               <div className="flex justify-between items-start border-b border-slate-200 pb-4">
                 <div>
-                  <h2 className="text-xl font-black text-[#07142F]">SEDES GEOSCIENCES &amp; SUBSEA</h2>
+                  <h2 className="text-xl font-black text-[#07142F]">BHUSRI GEOSCIENCES &amp; SUBSEA</h2>
                   <p className="font-mono text-[10px] text-slate-500">Logistics &amp; Crewing Division</p>
                 </div>
                 <div className="text-right font-mono">
@@ -410,7 +410,7 @@ export default function ContractsPage() {
               <div className="pt-4 border-t border-slate-200 flex justify-between items-end">
                 <div>
                   <p className="font-bold">Capt. Rajesh Varma</p>
-                  <p className="text-slate-500 font-mono text-[10px]">Head of Offshore Operations, SEDES</p>
+                  <p className="text-slate-500 font-mono text-[10px]">Head of Offshore Operations, BHUSRI</p>
                 </div>
                 <button
                   onClick={() => window.print()}
@@ -439,7 +439,7 @@ export default function ContractsPage() {
             <div className="space-y-6 text-xs font-sans">
               <div className="flex justify-between items-start border-b border-slate-200 pb-4">
                 <div>
-                  <h2 className="text-xl font-black text-[#07142F]">SEDES GEOSCIENCES</h2>
+                  <h2 className="text-xl font-black text-[#07142F]">BHUSRI GEOSCIENCES</h2>
                   <p className="font-mono text-[10px] text-slate-500">Contractor Remittance Advice</p>
                 </div>
                 <div className="text-right font-mono">

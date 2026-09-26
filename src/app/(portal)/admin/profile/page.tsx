@@ -19,7 +19,7 @@ export default function AdminCompanyProfilePage() {
   // Form state for adding new hub
   const [newCity, setNewCity] = useState<string>("");
   const [newCountry, setNewCountry] = useState<string>("India (East Coast Operations)");
-  const [newDomain, setNewDomain] = useState<string>("sedesmarine.com");
+  const [newDomain, setNewDomain] = useState<string>("bhusrimarine.com");
   const [newAddress, setNewAddress] = useState<string>("");
   const [newPhone, setNewPhone] = useState<string>("");
   const [newEmail, setNewEmail] = useState<string>("");
@@ -518,7 +518,7 @@ export default function AdminCompanyProfilePage() {
                     onChange={(e) => setNewDomain(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 p-3 font-mono outline-none focus:ring-2 focus:ring-[#07142F]"
                   >
-                    <option value="sedesmarine.com">sedesmarine.com</option>
+                    <option value="bhusrimarine.com">bhusrimarine.com</option>
                     <option value="bhusrigeo.com">bhusrigeo.com</option>
                   </select>
                 </div>

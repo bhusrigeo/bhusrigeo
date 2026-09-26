@@ -119,8 +119,8 @@ export function InvoicePdfView({ invoice, onClose }: { invoice: Invoice; onClose
           <div className="flex flex-col sm:flex-row justify-between items-start pt-4 border-t border-slate-200 gap-6">
             <div className="space-y-2 text-xs text-slate-500 max-w-sm font-sans">
               <span className="font-mono text-[10px] font-bold uppercase text-slate-400 block">Payment Terms &amp; Wire Info:</span>
-              <p>Payment due within 30 days of invoice issue. Electronic wire transfer to SEDES Geosciences bank account.</p>
-              <p className="font-mono text-[11px] text-slate-700 font-bold">SWIFT: SEDESINBB / IFSC: SBIN0000001</p>
+              <p>Payment due within 30 days of invoice issue. Electronic wire transfer to BHUSRI Geosciences bank account.</p>
+              <p className="font-mono text-[11px] text-slate-700 font-bold">SWIFT: BHUSRIINBB / IFSC: SBIN0000001</p>
             </div>
 
             <div className="w-full sm:w-80 rounded-2xl bg-slate-50 p-5 space-y-2.5 border border-slate-200 text-xs font-mono">

@@ -115,7 +115,7 @@ export function SurfaceToSeabed() {
           opacity="0.6"
         />
 
-        {/* Surface Vessel Hull SVG (RV Pacific Explorer - SEDES Fleet) */}
+        {/* Surface Vessel Hull SVG (RV Pacific Explorer - BHUSRI Fleet) */}
         <g transform="translate(425 65)">
           {/* Hull */}
           <path
@@ -191,7 +191,7 @@ export function SurfaceToSeabed() {
         </text>
 
         <text x="35" y="485" fill="#fef08a" fontSize="14" fontWeight="700" fontFamily="monospace">
-          Permanent Bedrock Refusal Horizon (sedes)
+          Permanent Bedrock Refusal Horizon (bhusri)
         </text>
       </svg>
 

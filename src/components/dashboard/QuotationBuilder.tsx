@@ -103,8 +103,8 @@ export function QuotationBuilder() {
     return dualLines.reduce((sum, item) => sum + item.staffPayRateDay * item.quantityDays, 0);
   }, [dualLines]);
 
-  const totalSedesMargin = totalClientBilling - totalStaffCost;
-  const overallMarginPercent = totalClientBilling > 0 ? (totalSedesMargin / totalClientBilling) * 100 : 0;
+  const totalBhusriMargin = totalClientBilling - totalStaffCost;
+  const overallMarginPercent = totalClientBilling > 0 ? (totalBhusriMargin / totalClientBilling) * 100 : 0;
 
   const displayMultiplier = currency === "USD" ? 1 : rate;
 
@@ -240,7 +240,7 @@ export function QuotationBuilder() {
           <span className="font-mono text-xs text-emerald-300 uppercase block font-bold">BHUSRI Gross Profit Margin</span>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-2xl font-black text-emerald-400 font-mono">
-              {money(totalSedesMargin * displayMultiplier, currency)}
+              {money(totalBhusriMargin * displayMultiplier, currency)}
             </span>
             <span className="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded">
               {overallMarginPercent.toFixed(1)}% MARGIN

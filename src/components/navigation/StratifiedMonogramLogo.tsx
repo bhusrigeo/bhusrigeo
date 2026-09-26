@@ -8,7 +8,7 @@ export function StratifiedMonogramLogo({ className = "h-10 w-10 text-white" }: {
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="SEDES Geosciences Monogram Logo"
+      aria-label="BHUSRI Geosciences Monogram Logo"
     >
       {/* Top Vessel Hull */}
       <path d="M20 22 L80 22 L70 34 L30 34 Z" fill="currentColor" />
