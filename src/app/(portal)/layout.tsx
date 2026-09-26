@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { PortalSidebar } from "@/components/navigation/PortalSidebar";
 
 export default function PortalLayout({
@@ -5,6 +8,17 @@ export default function PortalLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/login";
+
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen w-full bg-[#07142F] text-white">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-900">
       <PortalSidebar />
