@@ -1,0 +1,282 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  SuperAdmin
+  OperationsManager
+  FinanceManager
+  EnterpriseClient
+  Freelancer
+}
+
+enum ProjectStage {
+  TENDER_RFQ
+  MOBILIZATION
+  ACQUISITION
+  REMOTE_PROCESSING_QC
+  INTERPRETATION
+  FINAL_DELIVERY
+  INVOICED_CLOSED
+}
+
+enum RFPStatus {
+  NEW_LEAD
+  TECHNICAL_FEASIBILITY
+  QUOTE_GENERATED
+  AWARDED
+  DECLINED
+}
+
+enum Currency {
+  USD
+  INR
+}
+
+enum FreelancerDiscipline {
+  HYDROGRAPHER
+  PROCESSING_GEOPHYSICIST
+  SEISMIC_INTERPRETER
+  GEOTECHNICAL_ENGINEER
+  PARTY_CHIEF
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PRO_FORMA
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  VOID
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TAX
+  EXCHANGE_GAIN
+  EXCHANGE_LOSS
+}
+
+enum TelemetrySeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum TelemetrySource {
+  VESSEL
+  REMOTE_QC
+  PROCESSING_PIPELINE
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  name               String?
+  role               UserRole
+  companyName        String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  projects           Project[]           @relation("ClientProjects")
+  assignedProjects   Project[]           @relation("ManagerProjects")
+  freelancerProfile  FreelancerProfile?
+  clientRfps         ClientRFP[]
+  createdQuotes      Quote[]             @relation("CreatedQuotes")
+}
+
+model Project {
+  id                    String          @id @default(cuid())
+  projectNumber         String          @unique
+  name                  String
+  clientId              String
+  client                User            @relation("ClientProjects", fields: [clientId], references: [id])
+  operationsManagerId   String?
+  operationsManager     User?           @relation("ManagerProjects", fields: [operationsManagerId], references: [id])
+  stage                 ProjectStage    @default(TENDER_RFQ)
+  currency              Currency        @default(USD)
+  surveyLocation        String?
+  latitude              Float?
+  longitude             Float?
+  waterDepthMeters      Float?
+  mobilizationWindow    String?
+  vesselName            String?
+  utmZone               String?
+  remoteProcessingUrl   String?
+  progressPercent       Int             @default(0)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  deliverables          Deliverable[]
+  telemetryLogs         TelemetryLog[]
+  quotes                Quote[]
+  invoices              Invoice[]
+  transactions          Transaction[]
+}
+
+model ClientRFP {
+  id                    String       @id @default(cuid())
+  companyName           String
+  contactName           String
+  email                 String
+  phone                 String?
+  projectType           String
+  surveyLocation        String
+  latitude              Float?
+  longitude             Float?
+  targetWaterDepth      Float?
+  mobilizationWindow    String
+  vesselRequirement     String
+  status                RFPStatus    @default(NEW_LEAD)
+  ownerId               String?
+  owner                 User?        @relation(fields: [ownerId], references: [id])
+  documents             Json?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+}
+
+model FreelancerProfile {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  user                  User                  @relation(fields: [userId], references: [id])
+  discipline            FreelancerDiscipline
+  yearsExperience       Int
+  certifications        String[]
+  software              String[]
+  dayRateUsd            Decimal?              @db.Decimal(12, 2)
+  dayRateInr            Decimal?              @db.Decimal(12, 2)
+  availableFrom         DateTime?
+  offshoreAvailability  Boolean               @default(false)
+  cvKey                 String?
+  logbookKey            String?
+  verified              Boolean               @default(false)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model Deliverable {
+  id              String   @id @default(cuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name            String
+  type            String
+  storageKey      String
+  fileSize        BigInt?
+  checksum        String?
+  uploadedBy      String
+  createdAt       DateTime @default(now())
+}
+
+model TelemetryLog {
+  id                  String             @id @default(cuid())
+  projectId           String
+  project             Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  timestamp           DateTime           @default(now())
+  source              TelemetrySource
+  severity            TelemetrySeverity
+  message             String
+  acquisitionLine     String?
+  dataQualityScore    Float?
+  waterDepthMeters    Float?
+  processedPercent    Float?
+}
+
+model Quote {
+  id              String            @id @default(cuid())
+  quoteNumber     String            @unique
+  projectId       String
+  project         Project           @relation(fields: [projectId], references: [id])
+  createdById     String
+  createdBy       User              @relation("CreatedQuotes", fields: [createdById], references: [id])
+  currency        Currency          @default(USD)
+  exchangeRate    Decimal?          @db.Decimal(12, 6)
+  subtotal        Decimal           @db.Decimal(14, 2)
+  taxTotal        Decimal           @db.Decimal(14, 2)
+  total           Decimal           @db.Decimal(14, 2)
+  status          QuoteStatus       @default(DRAFT)
+  validUntil      DateTime?
+  lines           QuotationLineItem[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model QuotationLineItem {
+  id          String   @id @default(cuid())
+  quoteId     String
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  description String
+  category    String
+  quantity    Decimal  @db.Decimal(12, 3)
+  unit        String
+  unitPrice   Decimal  @db.Decimal(14, 2)
+  taxRate     Decimal  @db.Decimal(8, 4)
+  total       Decimal  @db.Decimal(14, 2)
+}
+
+model Invoice {
+  id                    String          @id @default(cuid())
+  invoiceNumber         String          @unique
+  projectId             String
+  project               Project         @relation(fields: [projectId], references: [id])
+  currency              Currency
+  subtotal              Decimal         @db.Decimal(14, 2)
+  taxTotal              Decimal         @db.Decimal(14, 2)
+  total                 Decimal         @db.Decimal(14, 2)
+  paidAmount            Decimal         @default(0) @db.Decimal(14, 2)
+  status                InvoiceStatus   @default(DRAFT)
+  issueDate             DateTime?
+  dueDate               DateTime?
+  exchangeRateAtIssue   Decimal?        @db.Decimal(12, 6)
+  exchangeRateAtPayment Decimal?        @db.Decimal(12, 6)
+  exchangeGainLoss      Decimal?        @db.Decimal(14, 2)
+  lines                 InvoiceLineItem[]
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+}
+
+model InvoiceLineItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Decimal  @db.Decimal(12, 3)
+  unit        String
+  unitPrice   Decimal  @db.Decimal(14, 2)
+  taxRate     Decimal  @db.Decimal(8, 4)
+  total       Decimal  @db.Decimal(14, 2)
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  projectId   String?
+  project     Project?        @relation(fields: [projectId], references: [id])
+  type        TransactionType
+  currency    Currency
+  amount      Decimal         @db.Decimal(14, 2)
+  exchangeRate Decimal?       @db.Decimal(12, 6)
+  description String
+  occurredAt  DateTime        @default(now())
+}
+
+model ExchangeRate {
+  id          String   @id @default(cuid())
+  base        Currency
+  quote       Currency
+  rate        Decimal  @db.Decimal(12, 6)
+  observedAt  DateTime @default(now())
+
+  @@unique([base, quote])
+}
