@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MOCK_FREELANCERS } from "@/lib/mockData";
 import { AvailabilityStatus, SpecialistRecord } from "@/types/domain";
 import { AiRosterMatcher } from "@/components/ai/AiRosterMatcher";
+import { SpecialistDocVerification } from "@/components/crewing/SpecialistDocVerification";
 import { money } from "@/lib/finance/currency";
 import {
   Users,
@@ -17,10 +18,12 @@ import {
   UserCheck,
   Building2,
   MapPin,
-  X
+  X,
+  ShieldCheck
 } from "lucide-react";
 
 export default function FreelancersPage() {
+  const [activeTab, setActiveTab] = useState<"ROSTER" | "COMPLIANCE_AUDIT">("ROSTER");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [selectedSpecialist, setSelectedSpecialist] = useState<SpecialistRecord | null>(null);
@@ -70,8 +73,39 @@ export default function FreelancersPage() {
         </div>
       </div>
 
-      {/* AI Smart Roster Matcher Widget */}
-      <AiRosterMatcher />
+      {/* Tab Selector: Roster Cards vs Compliance Verification Hub */}
+      <div className="flex items-center gap-3 border-b border-slate-200 pb-1">
+        <button
+          onClick={() => setActiveTab("ROSTER")}
+          className={`flex items-center gap-2 px-5 py-2.5 font-mono text-xs font-extrabold uppercase rounded-xl transition-all cursor-pointer ${
+            activeTab === "ROSTER"
+              ? "bg-[#07142F] text-white shadow-md"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <Users className="h-4 w-4" />
+          <span>Specialist Roster ({filteredSpecialists.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("COMPLIANCE_AUDIT")}
+          className={`flex items-center gap-2 px-5 py-2.5 font-mono text-xs font-extrabold uppercase rounded-xl transition-all cursor-pointer ${
+            activeTab === "COMPLIANCE_AUDIT"
+              ? "bg-[#07142F] text-white shadow-md"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <ShieldCheck className="h-4 w-4 text-emerald-400" />
+          <span>Passport, Visa &amp; Medical Verification Hub</span>
+        </button>
+      </div>
+
+      {activeTab === "COMPLIANCE_AUDIT" ? (
+        <SpecialistDocVerification />
+      ) : (
+        <>
+          {/* AI Smart Roster Matcher Widget */}
+          <AiRosterMatcher />
 
       {/* Roster Controls: Search & Status Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -270,13 +304,15 @@ export default function FreelancersPage() {
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setSelectedSpecialist(null)}
-                className="bg-[#07142F] text-white font-bold text-xs uppercase px-6 py-2.5 rounded-xl"
+                className="bg-[#07142F] text-white font-bold text-xs uppercase px-6 py-2.5 rounded-xl cursor-pointer"
               >
                 Close Record View
               </button>
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

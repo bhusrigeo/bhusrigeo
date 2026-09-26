@@ -6,6 +6,7 @@ import { MOCK_DUAL_MARGIN_QUOTES, MOCK_CLIENT_COMPANIES } from "@/lib/mockData";
 import type { Currency, DualMarginLineItem } from "@/types/domain";
 import { Plus, Trash2, RefreshCw, Calculator, Mail, CheckCircle2, TrendingUp, Layers, Send, FileText, X, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { QuotationPdfView } from "@/components/quotations/QuotationPdfView";
 
 export function QuotationBuilder() {
   const [currency, setCurrency] = useState<Currency>("USD");
@@ -699,14 +700,14 @@ export function QuotationBuilder() {
                 <button
                   type="button"
                   onClick={() => setShowEmailModal(false)}
-                  className="border border-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl hover:bg-slate-100"
+                  className="border border-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={emailSentSuccess}
-                  className="bg-[#07142F] text-white hover:bg-slate-800 font-extrabold uppercase tracking-wider px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-md"
+                  className="bg-[#07142F] text-white hover:bg-slate-800 font-extrabold uppercase tracking-wider px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-md cursor-pointer"
                 >
                   <Send className="h-3.5 w-3.5" />
                   <span>Dispatch Email &amp; PDF</span>
@@ -715,6 +716,20 @@ export function QuotationBuilder() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Commercial Quotation & Technical Proposal PDF Modal */}
+      {showPdfModal && (
+        <QuotationPdfView
+          quoteNumber="BHS-QT-2026-014"
+          clientName={clientCompany}
+          projectName="KG-DWN-98/2 Rig-Site Clearance & Technical Manpower"
+          location="KG Basin, Bay of Bengal"
+          currency={currency}
+          items={dualLines}
+          mobWindow="Immediate (Q4 2026)"
+          onClose={() => setShowPdfModal(false)}
+        />
       )}
     </section>
   );
