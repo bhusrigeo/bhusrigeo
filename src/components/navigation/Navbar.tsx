@@ -12,12 +12,16 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-white/15 bg-[#07142F]/95 backdrop-blur-xl text-white shadow-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
         {/* Official BHUSRI Logo Header Badge */}
-        <Link href="/" className="flex items-center gap-4 group">
-          <div className="relative flex items-center justify-center px-4 py-2 rounded-xl bg-white shadow-lg ring-1 ring-white/20 group-hover:bg-slate-50 group-hover:scale-[1.02] transition-all duration-300">
+        <Link href="/" className="flex items-center gap-3 group shrink-0">
+          <div className="relative flex items-center justify-center px-3.5 py-1.5 rounded-xl bg-white shadow-xl ring-2 ring-white/30 group-hover:bg-slate-50 group-hover:scale-[1.02] transition-all duration-300 max-h-14">
             <img
               src="/bhusri-logo.png"
-              alt="BHUSRI Geosciences & Engineering Solutions Logo"
-              className="h-10 sm:h-11 w-auto object-contain transition-transform"
+              alt="BHUSRI Geosciences & Engineering Solutions"
+              className="h-10 sm:h-12 w-auto max-w-[220px] sm:max-w-[260px] object-contain transition-transform"
+              onError={(e) => {
+                // Fallback to logo.png if bhusri-logo.png has caching issues
+                (e.target as HTMLImageElement).src = "/logo.png";
+              }}
             />
           </div>
         </Link>

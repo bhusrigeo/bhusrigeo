@@ -71,6 +71,9 @@ export function PortalSidebar() {
     <aside className="w-64 shrink-0 border-r border-slate-200 bg-white min-h-[calc(100vh-4rem)] p-4 flex flex-col justify-between shadow-xs">
       <div className="space-y-6">
         <div>
+          <div className="px-3 mb-4 flex items-center">
+            <img src="/bhusri-logo.png" alt="BHUSRI Logo" className="h-9 w-auto object-contain" />
+          </div>
           <p className="px-3 text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold mb-2">
             BHUSRI ERP Control
           </p>
