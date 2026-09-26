@@ -63,7 +63,7 @@ export function PortalSidebar() {
       name: "Login Credentials",
       href: "/login",
       icon: Lock,
-      badge: "DEMO"
+      badge: "SECURE"
     }
   ];
 
