@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { money } from "@/lib/finance/currency";
 import { MOCK_DUAL_MARGIN_QUOTES, MOCK_CLIENT_COMPANIES } from "@/lib/mockData";
 import type { Currency, DualMarginLineItem } from "@/types/domain";
-import { Plus, Trash2, RefreshCw, Calculator, Mail, CheckCircle2, TrendingUp, Layers, Send, FileText, X, Printer } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Calculator, Mail, CheckCircle2, TrendingUp, Layers, Send, FileText, X, Printer, Anchor, Compass, Navigation, ShieldCheck, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuotationPdfView } from "@/components/quotations/QuotationPdfView";
 
@@ -23,12 +23,39 @@ export function QuotationBuilder() {
   const [clientCompany, setClientCompany] = useState<string>("TotalEnergies E&P USA Inc.");
   const [emailSubject, setEmailSubject] = useState<string>("BHUSRI Commercial Proposal: Offshore Survey Crewing & Telemetry Scope");
 
+  // Technical Scope & Vessel Custom Metadata State
+  const [vesselName, setVesselName] = useState<string>("RV Pacific Explorer");
+  const [imoNumber, setImoNumber] = useState<string>("IMO 9482012");
+  const [offshoreBlock, setOffshoreBlock] = useState<string>("Krishna Godavari Basin (KG-D6)");
+  const [mobilizationPort, setMobilizationPort] = useState<string>("Kakinada Deepwater Port");
+
+  // Dynamic Key-Value Custom Metadata Fields
+  const [customFields, setCustomFields] = useState<{ id: string; key: string; value: string }[]>([
+    { id: "cf-1", key: "DP System Class", value: "DP-2 Dynamic Positioning" },
+    { id: "cf-2", key: "Acoustic Equipment", value: "Kongsberg EM304 Multibeam + Edgetech 4200 SSS" }
+  ]);
+
+  function addCustomField() {
+    setCustomFields((prev) => [
+      ...prev,
+      { id: `cf-${Date.now()}`, key: "Custom Property", value: "Property Value" }
+    ]);
+  }
+
+  function updateCustomField(id: string, patch: Partial<{ key: string; value: string }>) {
+    setCustomFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
+  }
+
+  function removeCustomField(id: string) {
+    setCustomFields((prev) => prev.filter((f) => f.id !== id));
+  }
+
   // Editable Commercial Terms & Conditions state
   const [terms, setTerms] = useState<{ id: string; title: string; text: string }[]>([
     {
       id: "term-1",
       title: "Advance Mobilization Deposit",
-      text: "20% mobilization advance + upfront visa/flight costs billed upon project confirmation."
+      text: "30% mobilization advance + upfront visa/flight costs billed upon project confirmation."
     },
     {
       id: "term-2",
@@ -179,7 +206,7 @@ export function QuotationBuilder() {
             Client Billing vs Staff Pay Rate Commercial Engine
           </h2>
           <p className="text-xs text-slate-500 font-sans mt-0.5">
-            Quote high rates to enterprise customers while calculating staff contractor pay rates based on experience &amp; certifications.
+            Quote enterprise daily rates while managing staff contractor payouts &amp; vessel mobilization scope.
           </p>
         </div>
 
@@ -245,6 +272,130 @@ export function QuotationBuilder() {
             <span className="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded">
               {overallMarginPercent.toFixed(1)}% MARGIN
             </span>
+          </div>
+        </div>
+      </div>
+
+      {/* TECHNICAL SCOPE & VESSEL CUSTOM METADATA FORM GRID */}
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div className="flex items-center gap-2">
+            <Anchor className="h-4 w-4 text-[#07142F]" />
+            <h3 className="font-extrabold text-[#07142F] text-sm">
+              Vessel, Survey Block &amp; Technical Metadata Fields
+            </h3>
+          </div>
+          <span className="text-[10px] font-mono font-bold text-slate-500 uppercase bg-slate-200/80 px-2.5 py-0.5 rounded-full">
+            Included in Commercial Proposal PDF
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-[11px] font-mono font-bold uppercase text-slate-600 mb-1">
+              Chartered Vessel Name
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={vesselName}
+                onChange={(e) => setVesselName(e.target.value)}
+                placeholder="RV Pacific Explorer"
+                className="w-full font-bold text-slate-900 border-slate-300"
+              />
+              <Navigation className="absolute right-3 top-3 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-mono font-bold uppercase text-slate-600 mb-1">
+              Vessel IMO Number
+            </label>
+            <input
+              type="text"
+              value={imoNumber}
+              onChange={(e) => setImoNumber(e.target.value)}
+              placeholder="IMO 9482012"
+              className="w-full font-mono text-slate-900 border-slate-300 font-bold"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-mono font-bold uppercase text-slate-600 mb-1">
+              Offshore Block / Region
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={offshoreBlock}
+                onChange={(e) => setOffshoreBlock(e.target.value)}
+                placeholder="Krishna Godavari Basin"
+                className="w-full text-slate-900 border-slate-300 font-bold"
+              />
+              <Compass className="absolute right-3 top-3 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-mono font-bold uppercase text-slate-600 mb-1">
+              Mobilization Port
+            </label>
+            <input
+              type="text"
+              value={mobilizationPort}
+              onChange={(e) => setMobilizationPort(e.target.value)}
+              placeholder="Kakinada Deepwater Port"
+              className="w-full text-slate-900 border-slate-300 font-bold"
+            />
+          </div>
+        </div>
+
+        {/* DYNAMIC CUSTOM KEY-VALUE FIELDS */}
+        <div className="pt-2 border-t border-slate-200/80">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-[11px] font-mono font-bold uppercase text-slate-600 flex items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 text-[#07142F]" />
+              Custom Technical Specifications / Metadata Attributes
+            </label>
+            <Button
+              type="button"
+              onClick={addCustomField}
+              variant="outline"
+              size="sm"
+              className="gap-1 border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-[11px] py-1 h-7"
+            >
+              <Plus className="h-3 w-3 text-[#07142F]" />
+              Add Custom Attribute
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {customFields.map((field) => (
+              <div key={field.id} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
+                <input
+                  type="text"
+                  value={field.key}
+                  onChange={(e) => updateCustomField(field.id, { key: e.target.value })}
+                  placeholder="Attribute Name"
+                  className="w-1/3 font-mono text-xs font-bold text-slate-700 border-slate-300 p-1.5"
+                />
+                <span className="text-slate-400 font-bold">:</span>
+                <input
+                  type="text"
+                  value={field.value}
+                  onChange={(e) => updateCustomField(field.id, { value: e.target.value })}
+                  placeholder="Attribute Value"
+                  className="w-2/3 text-xs text-slate-900 font-semibold border-slate-300 p-1.5"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeCustomField(field.id)}
+                  className="text-slate-400 hover:text-rose-600 p-1 shrink-0"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -420,7 +571,7 @@ export function QuotationBuilder() {
           <Button
             onClick={() => setShowPdfModal(true)}
             variant="outline"
-            className="gap-2 border-[#07142F] text-[#07142F] hover:bg-slate-50 font-extrabold shadow-sm"
+            className="gap-2 border-[#07142F] text-[#07142F] hover:bg-slate-50 font-extrabold shadow-sm cursor-pointer"
           >
             <FileText className="h-4 w-4 text-[#07142F]" />
             View Commercial Proposal PDF
@@ -428,7 +579,7 @@ export function QuotationBuilder() {
 
           <Button
             onClick={() => setShowEmailModal(true)}
-            className="gap-2 bg-[#07142F] text-white hover:bg-slate-800 font-extrabold shadow-md"
+            className="gap-2 bg-[#07142F] text-white hover:bg-slate-800 font-extrabold shadow-md cursor-pointer"
           >
             <Mail className="h-4 w-4 text-[#FACC15]" />
             View &amp; Dispatch Client Proposal Email
@@ -436,300 +587,105 @@ export function QuotationBuilder() {
         </div>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* 1. PDF Proposal View Modal */}
-      {/* ------------------------------------------------------------- */}
+      {/* PDF Proposal View Modal */}
       {showPdfModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-xs p-4 overflow-y-auto print:static print:inset-auto print:bg-white print:p-0 print:m-0 print:block">
-          <div className="printable-pdf-document w-full max-w-4xl rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto text-slate-900 print:shadow-none print:border-none print:p-0 print:max-w-full print:m-0 print:max-h-none print:space-y-4">
-            {/* Document Header / Letterhead */}
-            <div className="flex items-start justify-between border-b-2 border-[#07142F] pb-6">
-              <div>
-                <span className="font-mono text-xs uppercase tracking-widest text-slate-500 font-extrabold block">
-                  Commercial Proposal Document
-                </span>
-                <h3 className="text-3xl font-black text-[#07142F] tracking-tight mt-0.5">
-                  BHUSRI GEOSCIENCES &amp; ENGINEERING SOLUTIONS
-                </h3>
-                <p className="text-xs font-mono text-slate-600 mt-1">
-                  bhusrigeo.com | bhusrimarine.com | Houston · Aberdeen · Dubai · Hyderabad
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="inline-block rounded-lg bg-[#07142F] px-3 py-1 font-mono text-xs font-bold text-white uppercase print:border print:border-slate-800 print:text-black">
-                  REF: SED-PROP-2026-089
-                </span>
-                <p className="text-xs font-mono text-slate-500 mt-2">
-                  Date: {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                </p>
-              </div>
-            </div>
-
-            {/* Client Info Grid */}
-            <div className="grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xs print:bg-white">
-              <div>
-                <span className="text-[10px] text-slate-500 font-bold uppercase block">PREPARED FOR:</span>
-                <p className="font-extrabold text-slate-900 text-sm mt-0.5">{clientCompany}</p>
-                <p className="text-slate-600 mt-0.5">Attn: Enterprise Procurement Team</p>
-                <p className="text-slate-600">{recipientEmail}</p>
-              </div>
-              <div>
-                <span className="text-[10px] text-slate-500 font-bold uppercase block">SERVICE DOMAIN:</span>
-                <p className="font-bold text-[#07142F] mt-0.5">Offshore Survey Manpower &amp; Data QC Telemetry</p>
-                <p className="text-slate-600 mt-0.5">Vessel Mobilization &amp; Crewing Support</p>
-                <p className="text-emerald-700 font-bold">Currency: {currency}</p>
-              </div>
-            </div>
-
-            {/* Quotation Line Items Table (Client View - High Billing Rates Only) */}
-            <div>
-              <h4 className="font-mono text-xs font-bold uppercase text-slate-700 mb-2">Commercial Schedule of Daily Rates</h4>
-              <div className="overflow-hidden rounded-xl border border-slate-200">
-                <table className="w-full text-left font-sans text-xs">
-                  <thead className="bg-[#07142F] font-mono text-white text-[11px] uppercase print:bg-slate-900">
-                    <tr>
-                      <th className="p-3">Specialist Scope / Role</th>
-                      <th className="p-3 text-center">Duration</th>
-                      <th className="p-3 text-right">Quoted Client Daily Rate</th>
-                      <th className="p-3 text-right">Line Total ({currency})</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 bg-white">
-                    {dualLines.map((line) => {
-                      const clientRate = currency === "INR" ? line.clientBillingRateDay * rate : line.clientBillingRateDay;
-                      const lineTotal = clientRate * line.quantityDays;
-                      return (
-                        <tr key={line.id} className="hover:bg-slate-50">
-                          <td className="p-3 font-bold text-slate-900">{line.roleTitle}</td>
-                          <td className="p-3 font-mono text-center">{line.quantityDays} Days</td>
-                          <td className="p-3 font-mono text-right font-bold text-slate-900">{money(clientRate, currency)}/day</td>
-                          <td className="p-3 font-mono text-right font-extrabold text-[#07142F]">{money(lineTotal, currency)}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  <tfoot className="bg-slate-100 font-mono font-bold text-slate-900 border-t-2 border-slate-300">
-                    <tr>
-                      <td colSpan={3} className="p-3 text-right uppercase text-slate-700">Total Commercial Investment:</td>
-                      <td className="p-3 text-right text-base text-[#07142F] font-black">{money(totalClientBilling * displayMultiplier, currency)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-
-            {/* Commercial Terms & Conditions (Dynamic & Editable) */}
-            <div className="space-y-2 text-xs text-slate-600 border-t border-slate-200 pt-4">
-              <h4 className="font-mono text-xs font-bold uppercase text-slate-800">Commercial Terms &amp; Conditions:</h4>
-              <ul className="list-disc pl-5 space-y-1.5 font-sans text-[11px]">
-                {terms.map((t) => (
-                  <li key={t.id}>
-                    <strong>{t.title}:</strong> {t.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Modal Actions (Hidden in Print) */}
-            <div className="flex justify-between items-center pt-4 border-t border-slate-200 print:hidden">
-              <button
-                onClick={() => setShowPdfModal(false)}
-                className="border border-slate-300 text-slate-700 font-bold px-5 py-2 rounded-xl hover:bg-slate-100 text-xs"
-              >
-                Close Preview
-              </button>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => window.print()}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-slate-400 text-slate-800 font-bold"
-                >
-                  <Printer className="h-3.5 w-3.5" />
-                  Print / Save PDF
-                </Button>
-
-                <Button
-                  onClick={() => {
-                    setShowPdfModal(false);
-                    setShowEmailModal(true);
-                  }}
-                  size="sm"
-                  className="gap-2 bg-[#07142F] text-white hover:bg-slate-800 font-bold"
-                >
-                  <Mail className="h-3.5 w-3.5 text-[#FACC15]" />
-                  Proceed to Email Dispatch
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <QuotationPdfView
+          quoteNumber="BHS-PROP-2026-089"
+          clientName={clientCompany}
+          projectName={`${offshoreBlock} (${vesselName})`}
+          location={mobilizationPort}
+          currency={currency}
+          items={dualLines}
+          mobWindow="Q4 2026 Mobilization"
+          onClose={() => setShowPdfModal(false)}
+        />
       )}
 
-      {/* ------------------------------------------------------------- */}
-      {/* 2. Client Proposal Email Format Preview & Dispatcher Modal */}
-      {/* ------------------------------------------------------------- */}
+      {/* Email Dispatch Modal */}
       {showEmailModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-[#07142F]" />
-                <h3 className="font-black text-slate-900 text-lg">Client Proposal Email Format &amp; Dispatcher</h3>
+                <h3 className="font-extrabold text-slate-900 text-base">Dispatch Proposal Email</h3>
               </div>
-              <button onClick={() => setShowEmailModal(false)} className="p-1 hover:bg-slate-100 rounded">
-                <X className="h-5 w-5 text-slate-500" />
+              <button
+                onClick={() => setShowEmailModal(false)}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSendEmail} className="space-y-4 text-xs font-sans">
-              {/* Saved Enterprise Client Selector */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
-                <label className="block font-mono text-[11px] font-bold uppercase text-[#07142F] flex items-center justify-between">
-                  <span>Select Saved Enterprise Client:</span>
-                  <span className="text-emerald-700 font-bold">Auto-Populates Client Info &amp; Rates</span>
-                </label>
-                <select
-                  value={selectedClientId}
-                  onChange={(e) => handleSelectSavedClient(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 font-bold text-slate-900 focus:border-[#07142F] focus:outline-none"
-                >
-                  {MOCK_CLIENT_COMPANIES.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.companyName} ({c.contactPerson}) — [{c.preferredCurrency}]
-                    </option>
-                  ))}
-                </select>
+            {emailSentSuccess ? (
+              <div className="p-6 text-center space-y-2 text-emerald-800">
+                <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto animate-bounce" />
+                <h4 className="font-extrabold text-lg">Proposal Email Dispatched!</h4>
+                <p className="text-xs text-slate-600 font-mono">
+                  Sent to {recipientEmail} via SMTP Gateway.
+                </p>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            ) : (
+              <form onSubmit={handleSendEmail} className="space-y-3 font-sans text-xs">
                 <div>
-                  <label className="block font-mono text-[11px] font-bold uppercase text-slate-600 mb-1">
-                    Recipient Email:
-                  </label>
+                  <label className="block font-mono font-bold text-slate-600 uppercase mb-1">Select Client Entity:</label>
+                  <select
+                    value={selectedClientId}
+                    onChange={(e) => handleSelectSavedClient(e.target.value)}
+                    className="w-full font-bold text-slate-900"
+                  >
+                    {MOCK_CLIENT_COMPANIES.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.companyName} ({c.contactPerson})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-mono font-bold text-slate-600 uppercase mb-1">Recipient Email:</label>
                   <input
                     type="email"
                     value={recipientEmail}
                     onChange={(e) => setRecipientEmail(e.target.value)}
                     required
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 font-mono text-xs text-slate-900 focus:border-[#07142F] focus:outline-none"
+                    className="w-full font-mono text-slate-900 font-bold"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-mono text-[11px] font-bold uppercase text-slate-600 mb-1">
-                    Client Operator Company:
-                  </label>
+                  <label className="block font-mono font-bold text-slate-600 uppercase mb-1">Email Subject:</label>
                   <input
                     type="text"
-                    value={clientCompany}
-                    onChange={(e) => setClientCompany(e.target.value)}
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
                     required
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 font-sans text-xs text-slate-900 focus:border-[#07142F] focus:outline-none"
+                    className="w-full font-bold text-slate-900"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block font-mono text-[11px] font-bold uppercase text-slate-600 mb-1">
-                  Email Subject Line:
-                </label>
-                <input
-                  type="text"
-                  value={emailSubject}
-                  onChange={(e) => setEmailSubject(e.target.value)}
-                  required
-                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 font-sans text-xs text-slate-900 focus:border-[#07142F] focus:outline-none"
-                />
-              </div>
-
-              {/* Email Content Body Preview Box */}
-              <div>
-                <label className="block font-mono text-[11px] font-bold uppercase text-slate-600 mb-1">
-                  Email Body Preview (Formatted Client Proposal):
-                </label>
-                <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-5 space-y-4 font-sans text-xs text-slate-800 leading-relaxed max-h-[300px] overflow-y-auto">
-                  <p className="font-semibold text-slate-900">Dear Procurement &amp; Operations Team at {clientCompany},</p>
-                  
-                  <p>
-                    Thank you for contacting <strong>BHUSRI GEOSCIENCES &amp; SUBSEA</strong> regarding your upcoming offshore survey campaign. Based on your vessel and survey crew requirements, we are pleased to submit our formal commercial proposal.
-                  </p>
-
-                  <div className="rounded-lg bg-white border border-slate-200 p-3 font-mono text-xs space-y-2">
-                    <div className="font-bold text-[#07142F] border-b border-slate-200 pb-1">
-                      COMMERCIAL QUOTATION SUMMARY ({currency})
-                    </div>
-                    {dualLines.map((l) => (
-                      <div key={l.id} className="flex justify-between text-slate-700">
-                        <span>• {l.roleTitle} ({l.quantityDays} days)</span>
-                        <span className="font-bold text-slate-900">{money(currency === "INR" ? l.clientBillingRateDay * rate : l.clientBillingRateDay, currency)}/day</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between font-bold text-slate-900 border-t border-slate-200 pt-2 text-sm">
-                      <span>Total Client Commercial Investment:</span>
-                      <span className="text-[#07142F]">{money(totalClientBilling * displayMultiplier, currency)}</span>
-                    </div>
-                  </div>
-
-                  <p>
-                    <strong>Next Steps upon Acceptance:</strong>
-                  </p>
-                  <ol className="list-decimal pl-5 space-y-1">
-                    <li>Confirm acceptance of this quotation and scope of work.</li>
-                    <li>BHUSRI issues the Advance Mobilization Invoice (covering upfront visa, flights &amp; deposit).</li>
-                    <li>BHUSRI assigns verified offshore specialists from our certified roster and issues LOI / Visa applications.</li>
-                  </ol>
-
-                  <p className="pt-2 text-slate-600 font-mono text-[11px]">
-                    Attached File: <strong>BHUSRI_Commercial_Proposal_2026.pdf</strong><br />
-                    Best regards,<br />
-                    <strong className="text-slate-900">Commercial Director | BHUSRI GEOSCIENCES &amp; SUBSEA</strong>
-                  </p>
+                <div className="pt-2 flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowEmailModal(false)}
+                    className="border-slate-300 font-bold text-xs"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-[#07142F] text-white hover:bg-slate-800 font-bold text-xs gap-1.5"
+                  >
+                    <Send className="h-3.5 w-3.5 text-[#FACC15]" />
+                    Send Commercial Proposal
+                  </Button>
                 </div>
-              </div>
-
-              {emailSentSuccess && (
-                <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-mono text-emerald-800 flex items-center gap-2 font-bold">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Quotation Email &amp; Proposal PDF Dispatched to Client!</span>
-                </div>
-              )}
-
-              <div className="pt-2 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowEmailModal(false)}
-                  className="border border-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl hover:bg-slate-100 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={emailSentSuccess}
-                  className="bg-[#07142F] text-white hover:bg-slate-800 font-extrabold uppercase tracking-wider px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-md cursor-pointer"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  <span>Dispatch Email &amp; PDF</span>
-                </button>
-              </div>
-            </form>
+              </form>
+            )}
           </div>
         </div>
-      )}
-
-      {/* Commercial Quotation & Technical Proposal PDF Modal */}
-      {showPdfModal && (
-        <QuotationPdfView
-          quoteNumber="BHS-QT-2026-014"
-          clientName={clientCompany}
-          projectName="KG-DWN-98/2 Rig-Site Clearance & Technical Manpower"
-          location="KG Basin, Bay of Bengal"
-          currency={currency}
-          items={dualLines}
-          mobWindow="Immediate (Q4 2026)"
-          onClose={() => setShowPdfModal(false)}
-        />
       )}
     </section>
   );

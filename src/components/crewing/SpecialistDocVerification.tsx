@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { MOCK_FREELANCERS } from "@/lib/mockData";
 import { SpecialistRecord } from "@/types/domain";
-import { ShieldCheck, FileCheck, Upload, CheckCircle2, AlertTriangle, Clock, X, FileText, Lock } from "lucide-react";
+import { ShieldCheck, FileCheck, Upload, CheckCircle2, AlertTriangle, Clock, X, FileText, Lock, Plus, Trash2, Tag } from "lucide-react";
 
 export function SpecialistDocVerification() {
   const [specialists, setSpecialists] = useState<SpecialistRecord[]>(MOCK_FREELANCERS);
@@ -13,8 +13,28 @@ export function SpecialistDocVerification() {
   // Document verification audit states
   const [passportVerified, setPassportVerified] = useState<boolean>(true);
   const [medicalVerified, setMedicalVerified] = useState<boolean>(true);
-  const [bosietVerified, setBosietVerified] = useState<boolean>(true);
-  const [visaVerified, setVisaVerified] = useState<boolean>(true);
+
+  // Custom Metadata Attributes per Specialist
+  const [customAttributes, setCustomAttributes] = useState<{ id: string; key: string; value: string }[]>([
+    { id: "ca-1", key: "Nearest International Airport", value: "Aberdeen Airport (ABZ)" },
+    { id: "ca-2", key: "Offshore Medical Class", value: "UK OGUK Class 1 Fit for Duty" },
+    { id: "ca-3", key: "Vaccination Audit", value: "Yellow Fever + COVID-19 Verified" }
+  ]);
+
+  function addAttribute() {
+    setCustomAttributes((prev) => [
+      ...prev,
+      { id: `ca-${Date.now()}`, key: "Custom Property", value: "Value" }
+    ]);
+  }
+
+  function updateAttribute(id: string, patch: Partial<{ key: string; value: string }>) {
+    setCustomAttributes((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+  }
+
+  function removeAttribute(id: string) {
+    setCustomAttributes((prev) => prev.filter((a) => a.id !== id));
+  }
 
   const handleSimulateUpload = (docType: string) => {
     setUploadSuccessToast(`${docType} successfully uploaded & SHA-256 verified!`);
@@ -24,7 +44,7 @@ export function SpecialistDocVerification() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[#07142F]">
       {/* Header Info */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -32,11 +52,11 @@ export function SpecialistDocVerification() {
             <ShieldCheck className="h-4 w-4 text-emerald-600" />
             Offshore Crew Compliance &amp; Document Audit Hub
           </div>
-          <h2 className="text-xl font-extrabold text-slate-900">
+          <h2 className="text-xl font-extrabold text-[#07142F]">
             Passport, Seaman CDC, OGUK Medical &amp; BOSIET Verification Matrix
           </h2>
           <p className="text-xs text-slate-500 mt-1 font-sans">
-            Audit mandatory offshore travel &amp; safety credentials prior to client vessel embarkation.
+            Audit mandatory offshore travel, safety credentials &amp; custom compliance attributes prior to client vessel embarkation.
           </p>
         </div>
 
@@ -208,6 +228,51 @@ export function SpecialistDocVerification() {
                   <Upload className="h-3.5 w-3.5 text-amber-600" />
                   <span>Upload BOSIET Refresher</span>
                 </button>
+              </div>
+            </div>
+
+            {/* SPECIALIST CUSTOM COMPLIANCE ATTRIBUTES SECTION */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono font-bold uppercase text-slate-700 flex items-center gap-1.5">
+                  <Tag className="h-4 w-4 text-[#07142F]" />
+                  Custom Specialist Compliance &amp; Travel Attributes
+                </label>
+                <button
+                  type="button"
+                  onClick={addAttribute}
+                  className="border border-slate-300 bg-white hover:bg-slate-100 font-mono text-[11px] font-bold px-3 py-1 rounded-lg flex items-center gap-1 text-slate-700 cursor-pointer"
+                >
+                  <Plus className="h-3 w-3 text-[#07142F]" />
+                  Add Custom Attribute
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {customAttributes.map((attr) => (
+                  <div key={attr.id} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200">
+                    <input
+                      type="text"
+                      value={attr.key}
+                      onChange={(e) => updateAttribute(attr.id, { key: e.target.value })}
+                      className="w-1/3 font-mono text-xs font-bold text-slate-700 border-slate-300"
+                    />
+                    <span className="text-slate-400 font-bold">:</span>
+                    <input
+                      type="text"
+                      value={attr.value}
+                      onChange={(e) => updateAttribute(attr.id, { value: e.target.value })}
+                      className="w-2/3 text-xs font-medium text-slate-900 border-slate-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeAttribute(attr.id)}
+                      className="text-slate-400 hover:text-rose-600 p-1"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
 
