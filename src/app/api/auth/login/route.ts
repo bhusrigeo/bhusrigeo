@@ -220,8 +220,13 @@ export async function POST(request: Request) {
         );
       }
 
-      // Single Admin User Authenticated
-      return NextResponse.json({
+      // Single Admin User Authenticated - Issue secure HttpOnly session cookie
+      const sessionToken = crypto
+        .createHmac("sha256", SECRET_KEY)
+        .update(`bhusri_executive_session:${adminEmail}:${Date.now()}`)
+        .digest("hex");
+
+      const response = NextResponse.json({
         success: true,
         authenticated: true,
         message: "Executive Admin authenticated successfully via 2FA Email Verification.",
@@ -232,6 +237,16 @@ export async function POST(request: Request) {
           company: "BHUSRI GEOSCIENCES & ENGINEERING SOLUTIONS PRIVATE LIMITED"
         }
       });
+
+      response.cookies.set("bhusri_session", sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 86400 // 24 hours
+      });
+
+      return response;
     }
 
     return NextResponse.json({ success: false, error: "Invalid login action" }, { status: 400 });

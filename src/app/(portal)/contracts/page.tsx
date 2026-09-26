@@ -86,10 +86,10 @@ export default function ContractsPage() {
         </div>
 
         {/* Tab Selection Controls */}
-        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-100 p-1 font-mono text-xs">
+        <div className="flex items-center overflow-x-auto max-w-full rounded-xl border border-slate-200 bg-slate-100 p-1 font-mono text-xs">
           <button
             onClick={() => setActiveTab("OFFERS")}
-            className={`rounded-lg px-4 py-2 font-bold transition-all cursor-pointer ${
+            className={`rounded-lg px-4 py-2 font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === "OFFERS"
                 ? "bg-[#07142F] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#07142F]"
@@ -99,7 +99,7 @@ export default function ContractsPage() {
           </button>
           <button
             onClick={() => setActiveTab("VISAS")}
-            className={`rounded-lg px-4 py-2 font-bold transition-all cursor-pointer ${
+            className={`rounded-lg px-4 py-2 font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === "VISAS"
                 ? "bg-[#07142F] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#07142F]"
@@ -109,7 +109,7 @@ export default function ContractsPage() {
           </button>
           <button
             onClick={() => setActiveTab("PAYSLIPS")}
-            className={`rounded-lg px-4 py-2 font-bold transition-all cursor-pointer ${
+            className={`rounded-lg px-4 py-2 font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === "PAYSLIPS"
                 ? "bg-[#07142F] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#07142F]"
@@ -497,7 +497,7 @@ export default function ContractsPage() {
       {/* ADD SPECIALIST VISA RECORD MODAL */}
       {showAddVisaModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs p-4 flex justify-center items-center">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 space-y-6 text-slate-900 shadow-2xl border border-slate-200">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 space-y-6 text-slate-900 shadow-2xl border border-slate-200">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <div>
                 <h3 className="font-extrabold text-lg text-[#07142F]">Add Specialist Visa &amp; Clearance Record</h3>

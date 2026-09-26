@@ -76,7 +76,7 @@ export function SubseaDepthScanner() {
       <CardContent className="space-y-6">
         {/* Interactive Depth Slider */}
         <div className="space-y-2">
-          <div className="flex justify-between text-xs font-mono font-medium text-slate-500">
+          <div className="flex justify-between text-[10px] sm:text-xs font-mono font-medium text-slate-500 overflow-x-auto">
             <span>0m (Surface)</span>
             <span>500m</span>
             <span>1,000m</span>

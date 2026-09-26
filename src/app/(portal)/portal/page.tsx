@@ -346,7 +346,7 @@ export default function PortalPage() {
       {/* ------------------------------------------------------------- */}
       {selectedRfp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5 text-slate-900">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5 text-slate-900">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
                 <span className="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200">
@@ -419,7 +419,7 @@ export default function PortalPage() {
       {/* ------------------------------------------------------------- */}
       {selectedApplicant && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5 text-slate-900">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5 text-slate-900">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
                 <span className="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-200">

@@ -226,7 +226,7 @@ export default function InvoicesPage() {
               </div>
 
               {/* Customer & Billing Details */}
-              <div className="grid grid-cols-2 gap-4 font-mono">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Billed Customer Name:
@@ -256,7 +256,7 @@ export default function InvoicesPage() {
               </div>
 
               {/* Milestone & Dates */}
-              <div className="grid grid-cols-3 gap-3 font-mono">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Milestone Stage:
@@ -297,7 +297,7 @@ export default function InvoicesPage() {
                   2. Billable Scope Line Items:
                 </label>
                 {lines.map((item, i) => (
-                  <div key={i} className="grid grid-cols-[2fr_1fr_1fr_40px] gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs items-center">
+                  <div key={i} className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_40px] gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs items-center">
                     <div>
                       <input
                         type="text"

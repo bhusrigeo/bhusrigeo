@@ -20,9 +20,9 @@ export default function PortalLayout({
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-900">
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-5rem)] bg-slate-50 text-slate-900">
       <PortalSidebar />
-      <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">{children}</main>
     </div>
   );
 }
