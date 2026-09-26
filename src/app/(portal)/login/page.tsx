@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ShieldCheck, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound, RefreshCw, ArrowLeft, Send } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShieldCheck, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound, RefreshCw, ArrowLeft, Send, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 function maskEmailAddress(emailStr: string) {
@@ -24,17 +24,49 @@ export default function LoginPage() {
   const [fallbackOtp, setFallbackOtp] = useState<string | null>(null);
   const [smtpNotice, setSmtpNotice] = useState<string | null>(null);
 
+  // 10-Minute Countdown Timer State (600 seconds)
+  const [timeLeft, setTimeLeft] = useState<number>(600);
+  const [isExpired, setIsExpired] = useState<boolean>(false);
+
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
 
+  // Countdown Timer Effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (step === "otp" && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setIsExpired(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [step, timeLeft]);
+
+  // Format seconds into MM:SS
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
   // Step 1: Send OTP via SMTP
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setIsLoading(true);
     setAuthError(null);
     setAuthSuccess(null);
+    setIsExpired(false);
+    setTimeLeft(600); // Reset to 10 minutes
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -75,6 +107,12 @@ export default function LoginPage() {
   // Step 2: Verify OTP
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isExpired) {
+      setAuthError("This OTP has expired after 10 minutes. Please click 'Resend Code' to dispatch a new code.");
+      return;
+    }
+
     setIsLoading(true);
     setAuthError(null);
 
@@ -145,8 +183,21 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Expired Warning Banner */}
+          {isExpired && step === "otp" && (
+            <div className="p-3.5 rounded-xl border border-amber-500/50 bg-amber-950/60 text-xs font-mono text-amber-200 flex items-start gap-2.5 backdrop-blur-md">
+              <Clock className="h-4 w-4 shrink-0 text-amber-400 mt-0.5 animate-pulse" />
+              <div>
+                <p className="font-bold text-amber-100">OTP Code Expired (10-Minute Limit)</p>
+                <p className="text-[11px] text-amber-300 mt-0.5">
+                  The security code has expired. Please click <strong>Resend Code</strong> below to generate a new 6-digit OTP.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Error Banner */}
-          {authError && (
+          {authError && !isExpired && (
             <div className="p-3.5 rounded-xl border border-red-500/40 bg-red-950/50 text-xs font-mono text-red-200 flex items-center gap-2 backdrop-blur-md">
               <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
               <span>{authError}</span>
@@ -162,14 +213,17 @@ export default function LoginPage() {
           )}
 
           {/* OTP Dispatched Info Banner */}
-          {step === "otp" && !authError && !authSuccess && (
+          {step === "otp" && !isExpired && !authError && !authSuccess && (
             <div className={`p-3.5 rounded-xl border text-xs font-mono backdrop-blur-md flex items-start gap-2.5 ${
               mailSent ? "border-emerald-400/40 bg-emerald-950/40 text-emerald-200" : "border-sky-400/40 bg-sky-950/50 text-sky-200"
             }`}>
               <Send className={`h-4 w-4 shrink-0 mt-0.5 ${mailSent ? "text-emerald-400" : "text-sky-400"}`} />
               <div>
-                <p className="font-bold text-white">
-                  {mailSent ? "6-Digit OTP Dispatched!" : "2FA Security Code Ready"}
+                <p className="font-bold text-white flex items-center justify-between">
+                  <span>{mailSent ? "6-Digit OTP Dispatched!" : "2FA Security Code Ready"}</span>
+                  <span className="font-mono text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-sky-300 font-bold border border-white/20">
+                    ⏱ {formatTime(timeLeft)}
+                  </span>
                 </p>
                 <p className="text-[11px] mt-0.5">
                   {mailSent ? (
@@ -250,30 +304,52 @@ export default function LoginPage() {
             /* STEP 2: OTP VERIFICATION FORM */
             <form onSubmit={handleVerifyOtp} className="space-y-4 pt-2">
               <div>
-                <label className="block text-xs font-mono font-bold uppercase text-slate-300 mb-1">
-                  Enter 6-Digit Email Security OTP
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-mono font-bold uppercase text-slate-300">
+                    Enter 6-Digit Security OTP
+                  </label>
+                  <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                    isExpired
+                      ? "bg-red-500/20 text-red-300 border border-red-500/40"
+                      : "bg-sky-500/20 text-sky-300 border border-sky-400/30"
+                  }`}>
+                    {isExpired ? "EXPIRED" : `⏱ ${formatTime(timeLeft)}`}
+                  </span>
+                </div>
+
                 <div className="relative">
                   <input
                     type="text"
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
+                    disabled={isExpired || isLoading}
                     required
-                    placeholder="123456"
+                    placeholder={isExpired ? "EXPIRED" : "123456"}
                     autoFocus
-                    className="w-full rounded-xl border border-sky-400/40 bg-white/10 px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.4em] text-white placeholder-slate-500 focus:border-sky-300 focus:bg-white/20 focus:outline-none transition-all shadow-inner"
+                    className={`w-full rounded-xl border px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.4em] transition-all shadow-inner ${
+                      isExpired
+                        ? "border-red-500/30 bg-red-950/20 text-slate-500 cursor-not-allowed"
+                        : "border-sky-400/40 bg-white/10 text-white placeholder-slate-500 focus:border-sky-300 focus:bg-white/20 focus:outline-none"
+                    }`}
                   />
-                  <KeyRound className="absolute right-3.5 top-3.5 h-5 w-5 text-sky-400" />
+                  <KeyRound className={`absolute right-3.5 top-3.5 h-5 w-5 ${isExpired ? "text-red-400" : "text-sky-400"}`} />
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-slate-300">
+
+                <div className="mt-2.5 flex items-center justify-between text-[11px] font-mono text-slate-300">
                   <span>Sent to {maskedEmail || maskEmailAddress(email)}</span>
                   <button
                     type="button"
-                    onClick={handleSendOtp}
-                    className="text-sky-300 hover:underline flex items-center gap-1 cursor-pointer"
+                    onClick={() => handleSendOtp()}
+                    disabled={isLoading}
+                    className={`flex items-center gap-1.5 font-bold px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                      isExpired
+                        ? "bg-amber-400 text-[#07142F] hover:bg-amber-300 animate-bounce shadow-lg"
+                        : "text-sky-300 hover:text-white hover:underline"
+                    }`}
                   >
-                    <RefreshCw className="h-3 w-3" /> Resend Code
+                    <RefreshCw className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
+                    <span>Resend New OTP</span>
                   </button>
                 </div>
               </div>
@@ -281,8 +357,12 @@ export default function LoginPage() {
               <div className="pt-2 space-y-2">
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-sky-400 text-[#07142F] hover:bg-sky-300 font-black text-sm uppercase tracking-wider py-3.5 rounded-xl shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                  disabled={isLoading || isExpired}
+                  className={`w-full font-black text-sm uppercase tracking-wider py-3.5 rounded-xl shadow-xl flex items-center justify-center gap-2 transition-all ${
+                    isExpired
+                      ? "bg-slate-700 text-slate-400 cursor-not-allowed opacity-60"
+                      : "bg-sky-400 text-[#07142F] hover:bg-sky-300 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                  }`}
                 >
                   {isLoading ? (
                     <span className="flex items-center gap-2">
