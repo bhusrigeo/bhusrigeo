@@ -20,5 +20,5 @@ primary_region = "iad"
 
 [[vm]]
   memory = "1gb"
-  cpu_kind = "shared font"
+  cpu_kind = "shared"
   cpus = 1
